@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Cristianisme i Justicia</title>
+    <meta charset="utf-8"/>
+    <style type="text/css">
+
+        h1 {
+            font-size: 30px;
+            color: #D9251D;
+            margin: 20px auto 20px auto;
+            display: block;
+            text-align: center;
+        }
+
+        h2 {
+            margin: 0;
+            padding: 0;
+            font-size: 22px;
+            color: #D9251D;
+
+        }
+
+        .container {
+            width: 100%;
+            overflow: hidden;
+            min-width: 1490px;
+            max-width: 1490px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .knobContainer {
+            text-align: center;
+            margin: 10px;
+        }
+
+        .knobContainer canvas {
+            cursor: pointer;
+        }
+
+        .rightPanel {
+            float: bottom;
+            width: 223px;
+            border-radius: 5px;
+            margin-left: 5px;
+        }
+
+        /* Specific mapael css class are below
+         * 'mapael' class is added by plugin
+        */
+
+        .mapael .mapTooltip {
+            position: absolute;
+            background-color: #fff;
+            moz-opacity: 0.80;
+            opacity: 0.80;
+            filter: alpha(opacity=80);
+            border-radius: 4px;
+            padding: 10px;
+            z-index: 1000;
+            max-width: 200px;
+            display: none;
+            color: #D9251D;
+        }
+
+        .mapael .map {
+            margin-right: 228px;
+            overflow: hidden;
+            position: relative;
+            background-color: #ffffff;
+            border-radius: 5px;
+        }
+
+        /* For all zoom buttons */
+        .mapael .zoomButton {
+            background-color: #000;
+            border: 1px solid #fff;
+            color: #fff;
+            width: 15px;
+            height: 15px;
+            line-height: 15px;
+            text-align: center;
+            border-radius: 3px;
+            cursor: pointer;
+            position: absolute;
+            top: 0;
+            font-weight: bold;
+            left: 10px;
+
+            -webkit-user-select: none;
+            -khtml-user-select : none;
+            -moz-user-select: none;
+            -o-user-select : none;
+            user-select: none;
+        }
+
+        /* Reset Zoom button first */
+        .mapael .zoomReset {
+            top: 10px;
+        }
+
+        /* Then Zoom In button */
+        .mapael .zoomIn {
+            top: 30px;
+        }
+
+        /* Then Zoom Out button */
+        .mapael .zoomOut {
+            top: 50px;
+        }
+
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.13/jquery.mousewheel.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js" charset="utf-8"></script>
+    <script src="js/jquery.mapael.js" charset="utf-8"></script>
+    <script src="https://rawgit.com/aterrien/jQuery-Knob/master/dist/jquery.knob.min.js" charset="utf-8"></script>
+    <script src="js/maps/world_countries.js" charset="utf-8"></script>
+
+    <script type="text/javascript">
+
+        $(function () {
+          function oscurecerColor(color, cant){
+//voy a extraer las tres partes del color
+var rojo = color.substr(1,2);
+var verd = color.substr(3,2);
+var azul = color.substr(5,2);
+
+//voy a convertir a enteros los string, que tengo en hexadecimal
+var introjo = parseInt(rojo,16);
+var intverd = parseInt(verd,16);
+var intazul = parseInt(azul,16);
+
+//ahora verifico que no quede como negativo y resto
+if ((introjo+cant<=255)&&(introjo+cant>=0)) introjo = introjo+cant;
+if ((intverd+cant<=255)&&(intverd+cant>=0)) intverd = intverd+cant;
+if ((intazul+cant<=255)&&(intazul+cant>=0)) intazul = intazul+cant;
+
+//voy a convertir a hexadecimal, lo que tengo en enteros
+rojo = introjo.toString(16);
+verd = intverd.toString(16);
+azul = intazul.toString(16);
+
+//voy a validar que los string hexadecimales tengan dos caracteres
+if (rojo.length<2) rojo = "0"+rojo;
+if (verd.length<2) verd = "0"+verd;
+if (azul.length<2) azul = "0"+azul;
+
+//voy a construir el color hexadecimal
+var oscuridad = "#"+rojo+verd+azul;
+
+//la función devuelve el valor del color hexadecimal resultante
+return oscuridad;
+}
+
+            var data = {
+              "areas" : {
+                "ES": { "value" : 41293,"tooltip": {"content": "<span style=\"font-weight:bold;\">Spain</span><br/> 41293 Exemplars"}},
+                "AD": { "value" : 5,"tooltip": {"content": "<span style=\"font-weight:bold;\">Andorra</span><br/> 5 Exemplars"}},
+                "DE": { "value" : 78,"tooltip": {"content": "<span style=\"font-weight:bold;\">Germany</span><br/> 78 Exemplars"}},
+                "GT": { "value" : 135,"tooltip": {"content": "<span style=\"font-weight:bold;\">Guatemala</span><br/> 135 Exemplars"}},
+                "BO": { "value" : 334,"tooltip": {"content": "<span style=\"font-weight:bold;\">Bolivia</span><br/> 334 Exemplars"}},
+                "DK": { "value" : 3,"tooltip": {"content": "<span style=\"font-weight:bold;\">Denmark</span><br/> 3 Exemplars"}},
+                "BR": { "value" : 577,"tooltip": {"content": "<span style=\"font-weight:bold;\">Brazil</span><br/> 577 Exemplars"}},
+                "GQ": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Equatorial Guinea</span><br/> 2 Exemplars"}},
+                "PE": { "value" : 459,"tooltip": {"content": "<span style=\"font-weight:bold;\">Peru</span><br/> 459 Exemplars"}},
+                "PR": { "value" : 105,"tooltip": {"content": "<span style=\"font-weight:bold;\">Puerto Rico</span><br/> 105 Exemplars"}},
+                "MX": { "value" : 1241,"tooltip": {"content": "<span style=\"font-weight:bold;\">Mexico</span><br/> 1241 Exemplars"}},
+                "HN": { "value" : 66,"tooltip": {"content": "<span style=\"font-weight:bold;\">Honduras</span><br/> 66 Exemplars"}},
+                "BE": { "value" : 71,"tooltip": {"content": "<span style=\"font-weight:bold;\">Belgium</span><br/> 71 Exemplars"}},
+                "IT": { "value" : 333,"tooltip": {"content": "<span style=\"font-weight:bold;\">Italy</span><br/> 333 Exemplars"}},
+                "CL": { "value" : 445,"tooltip": {"content": "<span style=\"font-weight:bold;\">Chile</span><br/> 445 Exemplars"}},
+                "EC": { "value" : 241,"tooltip": {"content": "<span style=\"font-weight:bold;\">Ecuador</span><br/> 241 Exemplars"}},
+                "UY": { "value" : 235,"tooltip": {"content": "<span style=\"font-weight:bold;\">Uruguay</span><br/> 235 Exemplars"}},
+                "FR": { "value" : 198,"tooltip": {"content": "<span style=\"font-weight:bold;\">France</span><br/> 198 Exemplars"}},
+                "CI": { "value" : 11,"tooltip": {"content": "<span style=\"font-weight:bold;\">Côte d'Ivoire</span><br/> 11 Exemplars"}},
+                "CH": { "value" : 28,"tooltip": {"content": "<span style=\"font-weight:bold;\">Switzerland</span><br/> 28 Exemplars"}},
+                "CU": { "value" : 162,"tooltip": {"content": "<span style=\"font-weight:bold;\">Cuba</span><br/> 162 Exemplars"}},
+                "ET": { "value" : 3,"tooltip": {"content": "<span style=\"font-weight:bold;\">Ethiopia</span><br/> 3 Exemplars"}},
+                "US": { "value" : 230,"tooltip": {"content": "<span style=\"font-weight:bold;\">United States</span><br/> 230 Exemplars"}},
+                "VE": { "value" : 247,"tooltip": {"content": "<span style=\"font-weight:bold;\">Venezuela</span><br/> 247 Exemplars"}},
+                "SV": { "value" : 179,"tooltip": {"content": "<span style=\"font-weight:bold;\">El Salvador</span><br/> 179 Exemplars"}},
+                "CO": { "value" : 856,"tooltip": {"content": "<span style=\"font-weight:bold;\">Colombia</span><br/> 856 Exemplars"}},
+                "PL": { "value" : 9,"tooltip": {"content": "<span style=\"font-weight:bold;\">Poland</span><br/> 9 Exemplars"}},
+                "AR": { "value" : 1418,"tooltip": {"content": "<span style=\"font-weight:bold;\">Argentina</span><br/> 1418 Exemplars"}},
+                "ZW": { "value" : 3,"tooltip": {"content": "<span style=\"font-weight:bold;\">Zimbabwe</span><br/> 3 Exemplars"}},
+                "TD": { "value" : 16,"tooltip": {"content": "<span style=\"font-weight:bold;\">Chad</span><br/> 16 Exemplars"}},
+                "DO": { "value" : 116,"tooltip": {"content": "<span style=\"font-weight:bold;\">Dominican Republic</span><br/> 116 Exemplars"}},
+                "NI": { "value" : 114,"tooltip": {"content": "<span style=\"font-weight:bold;\">Nicaragua</span><br/> 114 Exemplars"}},
+                "KH": { "value" : 3,"tooltip": {"content": "<span style=\"font-weight:bold;\">Cambodia</span><br/> 3 Exemplars"}},
+                "IE": { "value" : 8,"tooltip": {"content": "<span style=\"font-weight:bold;\">Ireland</span><br/> 8 Exemplars"}},
+                "BB": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Barbados</span><br/> 2 Exemplars"}},
+                "PT": { "value" : 130,"tooltip": {"content": "<span style=\"font-weight:bold;\">Portugal</span><br/> 130 Exemplars"}},
+                "EG": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Egypt</span><br/> 2 Exemplars"}},
+                "NL": { "value" : 16,"tooltip": {"content": "<span style=\"font-weight:bold;\">Netherlands</span><br/> 16 Exemplars"}},
+                "PY": { "value" : 99,"tooltip": {"content": "<span style=\"font-weight:bold;\">Paraguay</span><br/> 99 Exemplars"}},
+                "CR": { "value" : 90,"tooltip": {"content": "<span style=\"font-weight:bold;\">Costa Rica</span><br/> 90 Exemplars"}},
+                "JP": { "value" : 11,"tooltip": {"content": "<span style=\"font-weight:bold;\">Japan</span><br/> 11 Exemplars"}},
+                "GB": { "value" : 27,"tooltip": {"content": "<span style=\"font-weight:bold;\">United Kingdom</span><br/> 27 Exemplars"}},
+                "TW": { "value" : 5,"tooltip": {"content": "<span style=\"font-weight:bold;\">Taiwan</span><br/> 5 Exemplars"}},
+                "CA": { "value" : 22,"tooltip": {"content": "<span style=\"font-weight:bold;\">Canada</span><br/> 22 Exemplars"}},
+                "PH": { "value" : 10,"tooltip": {"content": "<span style=\"font-weight:bold;\">Philippines</span><br/> 10 Exemplars"}},
+                "SN": { "value" : 16,"tooltip": {"content": "<span style=\"font-weight:bold;\">Senegal</span><br/> 16 Exemplars"}},
+                "GN": { "value" : 18,"tooltip": {"content": "<span style=\"font-weight:bold;\">Guinea</span><br/> 18 Exemplars"}},
+                "PA": { "value" : 97,"tooltip": {"content": "<span style=\"font-weight:bold;\">Panama</span><br/> 97 Exemplars"}},
+                "CD": { "value" : 9,"tooltip": {"content": "<span style=\"font-weight:bold;\">Congo, The Democratic Republic of the</span><br/> 9 Exemplars"}},
+                "IN": { "value" : 21,"tooltip": {"content": "<span style=\"font-weight:bold;\">India</span><br/> 21 Exemplars"}},
+                "TZ": { "value" : 4,"tooltip": {"content": "<span style=\"font-weight:bold;\">Tanzania, United Republic of</span><br/> 4 Exemplars"}},
+                "CM": { "value" : 14,"tooltip": {"content": "<span style=\"font-weight:bold;\">Cameroon</span><br/> 14 Exemplars"}},
+                "LB": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Lebanon</span><br/> 2 Exemplars"}},
+                "VN": { "value" : 1,"tooltip": {"content": "<span style=\"font-weight:bold;\">Viet Nam</span><br/> 1 Exemplars"}},
+                "AT": { "value" : 14,"tooltip": {"content": "<span style=\"font-weight:bold;\">Austria</span><br/> 14 Exemplars"}},
+                "NG": { "value" : 1,"tooltip": {"content": "<span style=\"font-weight:bold;\">Nigeria</span><br/> 1 Exemplars"}},
+                "MT": { "value" : 4,"tooltip": {"content": "<span style=\"font-weight:bold;\">Malta</span><br/> 4 Exemplars"}},
+                "ID": { "value" : 3,"tooltip": {"content": "<span style=\"font-weight:bold;\">Indonesia</span><br/> 3 Exemplars"}},
+                "SK": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Slovakia</span><br/> 2 Exemplars"}},
+                "HU": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Hungary</span><br/> 2 Exemplars"}},
+                "LT": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Lithuania</span><br/> 2 Exemplars"}},
+                "SI": { "value" : 3,"tooltip": {"content": "<span style=\"font-weight:bold;\">Slovenia</span><br/> 3 Exemplars"}},
+                "HR": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Croatia</span><br/> 2 Exemplars"}},
+                "BZ": { "value" : 4,"tooltip": {"content": "<span style=\"font-weight:bold;\">Belize</span><br/> 4 Exemplars"}},
+                "MZ": { "value" : 27,"tooltip": {"content": "<span style=\"font-weight:bold;\">Mozambique</span><br/> 27 Exemplars"}},
+                "AO": { "value" : 12,"tooltip": {"content": "<span style=\"font-weight:bold;\">Angola</span><br/> 12 Exemplars"}},
+                "KE": { "value" : 7,"tooltip": {"content": "<span style=\"font-weight:bold;\">Kenya</span><br/> 7 Exemplars"}},
+                "SE": { "value" : 9,"tooltip": {"content": "<span style=\"font-weight:bold;\">Sweden</span><br/> 9 Exemplars"}},
+                "AU": { "value" : 7,"tooltip": {"content": "<span style=\"font-weight:bold;\">Australia</span><br/> 7 Exemplars"}},
+                "RW": { "value" : 8,"tooltip": {"content": "<span style=\"font-weight:bold;\">Rwanda</span><br/> 8 Exemplars"}},
+                "GH": { "value" : 1,"tooltip": {"content": "<span style=\"font-weight:bold;\">Ghana</span><br/> 1 Exemplars"}},
+                "DZ": { "value" : 4,"tooltip": {"content": "<span style=\"font-weight:bold;\">Algeria</span><br/> 4 Exemplars"}},
+                "MA": { "value" : 7,"tooltip": {"content": "<span style=\"font-weight:bold;\">Morocco</span><br/> 7 Exemplars"}},
+                "RU": { "value" : 5,"tooltip": {"content": "<span style=\"font-weight:bold;\">Russian Federation</span><br/> 5 Exemplars"}},
+                "GA": { "value" : 3,"tooltip": {"content": "<span style=\"font-weight:bold;\">Gabon</span><br/> 3 Exemplars"}},
+                "SC": { "value" : 1,"tooltip": {"content": "<span style=\"font-weight:bold;\">Seychelles</span><br/> 1 Exemplars"}},
+                "LU": { "value" : 1,"tooltip": {"content": "<span style=\"font-weight:bold;\">Luxembourg</span><br/> 1 Exemplars"}},
+                "GR": { "value" : 1,"tooltip": {"content": "<span style=\"font-weight:bold;\">Greece</span><br/> 1 Exemplars"}},
+                "BF": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Burkina Faso</span><br/> 2 Exemplars"}},
+                "ML": { "value" : 3,"tooltip": {"content": "<span style=\"font-weight:bold;\">Mali</span><br/> 3 Exemplars"}},
+                "KR": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Korea, Republic of</span><br/> 2 Exemplars"}},
+                "MR": { "value" : 1,"tooltip": {"content": "<span style=\"font-weight:bold;\">Mauritania</span><br/> 1 Exemplars"}},
+                "RO": { "value" : 3,"tooltip": {"content": "<span style=\"font-weight:bold;\">Romania</span><br/> 3 Exemplars"}},
+                "CZ": { "value" : 4,"tooltip": {"content": "<span style=\"font-weight:bold;\">Czech Republic</span><br/> 4 Exemplars"}},
+                "TG": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Togo</span><br/> 2 Exemplars"}},
+                "BI": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">Burundi</span><br/> 2 Exemplars"}},
+                "CN": { "value" : 2,"tooltip": {"content": "<span style=\"font-weight:bold;\">China</span><br/> 2 Exemplars"}},
+                "IL": { "value" : 5,"tooltip": {"content": "<span style=\"font-weight:bold;\">Israel</span><br/> 5 Exemplars"}},
+                "NO": { "value" : 3,"tooltip": {"content": "<span style=\"font-weight:bold;\">Norway</span><br/> 3 Exemplars"}},
+                "BJ": { "value" : 3,"tooltip": {"content": "<span style=\"font-weight:bold;\">Benin</span><br/> 3 Exemplars"}},
+                "SL": { "value" : 1,"tooltip": {"content": "<span style=\"font-weight:bold;\">Sierra Leone</span><br/> 1 Exemplars"}},
+                "HT": { "value" : 5,"tooltip": {"content": "<span style=\"font-weight:bold;\">Haiti</span><br/> 5 Exemplars"}},
+                "TL": { "value" : 1,"tooltip": {"content": "<span style=\"font-weight:bold;\">Timor-Leste</span><br/> 1 Exemplars"}},
+                "TN": { "value" : 1,"tooltip": {"content": "<span style=\"font-weight:bold;\">Tunisia</span><br/> 1 Exemplars"}},
+              }
+
+
+            };
+
+
+
+            // Knob initialisation (for selecting a year)
+            $(".knob").knob({
+                release: function (value) {
+                    $(".world").trigger('update', [{
+                        mapOptions: data[value],
+                        animDuration: 300
+                    }]);
+                }
+            });
+
+            // Mapael initialisation
+            $world = $(".world");
+            $world.mapael({
+                map: {
+                    name: "world_countries",
+                    defaultArea: {
+                        attrs: {
+                            fill: "#f3f3f3",
+                            stroke: "#ffffff",
+                            "stroke-width": 1
+                        }
+                        , attrsHover: {
+                            fill: "#000",
+                        }
+
+                    },
+                    zoom: {
+                        enabled: true
+                        , step: 0.25
+                        , maxLevel: 20
+                    }
+                },
+                legend: {
+                    area: {
+                        display: true,
+                        title: "Suscripciones",
+                        marginBottom: 7,
+                        slices: [
+                            {
+                                max: 0,
+                                attrs: {
+                                    fill: "#f3f3f3"
+                                },
+                                label: "0 Suscripciones"
+                                , attrsHover: {
+                                    fill: "#a40000",
+                                }
+                            },
+                            {
+                            	  min: 1,
+                                max: 50,
+                                attrs: {
+                                    fill: "#ffded6"
+                                },
+                                label: "Menos de 50"
+                                , attrsHover: {
+                                    fill: "#a40000",
+                                }
+                            },
+                            {
+                            	  min: 50,
+                            	  max: 200,
+                                attrs: {
+                                    fill: "#ffbdaf"
+                                },
+                                label: "Entre 50 y 200"
+                                , attrsHover: {
+                                    fill: "#a40000",
+                                }
+                            },
+                            {
+                            	  min: 200,
+                            	  max: 500,
+                                attrs: {
+                                    fill: "#fb9c88"
+                                },
+                                label: "Entre 200 y 500"
+                                , attrsHover: {
+                                  fill: oscurecerColor("#fb9c88", 35),
+                                }
+                            },
+                            {
+                                min: 500,
+                                max: 1000,
+                                attrs: {
+                                    fill: "#f27a64"
+                                },
+                                label: "Entre 500 y mil"
+                                , attrsHover: {
+                                    fill: "#e33a1d",
+                                }
+                            },
+                            {
+                                min: 1000,
+                                max: 10000,
+                                attrs: {
+                                    fill: "#e75640"
+                                },
+                                label: "Entre mil y 10 mil"
+                                , attrsHover: {
+                                    fill: "#cc2323",
+                                }
+                            },
+                            {
+                                min: 10000,
+                                attrs: {
+                                    fill: "#D9251D"
+                                }
+                                , attrsHover: {
+                                    fill: "#a40000",
+                                },
+                                label: "Mas de 10 mil"
+                            }
+                        ]
+                    },
+                },
+                areas: data['areas']
+            });
+        });
+    </script>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>Cristianisme i Justicia</a></h1>
+    <div class="world">
+    <div class="map"></div>
+        <div class="rightPanel">
+<!--        <h2>Cuadernos vendidos hasta:</h2>
+
+            <div class="knobContainer">
+                <input class="knob" data-width="80" data-height="80" data-min="2019" data-max="2019" data-cursor=true
+                       data-fgColor="#454545" data-thickness=.45 value="2019" data-bgColor="#c7e8ff"/>
+            </div> -->
+            <div class="areaLegend"></div>
+            <div class="seleccionarColor"></div>
+        </div>
+
+        <div style="clear: both;"></div>
+    </div>
+</div>
+
+</body>
+</html>
